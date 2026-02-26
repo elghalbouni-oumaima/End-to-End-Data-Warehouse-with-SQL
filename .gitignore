@@ -1,0 +1,55 @@
+# ===============================
+# Database Files
+# ===============================
+
+*.db
+*.sqlite
+*.sqlite3
+*.log
+*.bak
+*.backup
+*.sql.bak
+
+# MySQL dump files (optional if you don't want to push raw dumps)
+*.sql.gz
+
+# ===============================
+# Environment Files
+# ===============================
+
+.env
+.env.*
+config.local.*
+
+# ===============================
+# IDE & Editor Files
+# ===============================
+
+# VS Code
+.vscode/
+
+# JetBrains (DataGrip, IntelliJ, etc.)
+.idea/
+
+# Sublime
+*.sublime-project
+*.sublime-workspace
+
+# ===============================
+# OS Generated Files
+# ===============================
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# ===============================
+# Temporary Files
+# ===============================
+
+*.tmp
+*.swp
+*.pid
