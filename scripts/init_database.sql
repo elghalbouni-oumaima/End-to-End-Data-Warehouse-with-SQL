@@ -1,5 +1,5 @@
 
-/*
+/*==============================================================================
     Script to create the DataWarehouse database and its foundational schemas.
     - Creates the 'DataWarehouse' database if it doesn't exist.
     - Creates the following schemas if they don't exist: 
@@ -7,7 +7,7 @@
         • silver  : cleaned/processed data layer
         • gold    : aggregated/business-ready data layer
     Purpose: Sets up a structured environment for ETL processes and analytics.
-*/
+================================================================================*/
 
 -- Switch to the master database, which is required for database-level operations
 Use master;
