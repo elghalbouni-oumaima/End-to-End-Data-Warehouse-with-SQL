@@ -16,7 +16,6 @@
 # ===============================
 # Environment Files
 # ===============================
-/venv
 .env
 .env.*
 config.local.*
@@ -53,4 +52,4 @@ desktop.ini
 *.tmp
 *.swp
 *.pid
-./venv
+venv/
