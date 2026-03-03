@@ -1,4 +1,43 @@
- 
+/*==============================================================================
+  Procedure Name : silver.load_silver
+  Layer          : Silver
+  Type           : ETL Transformation Procedure
+  Author         : [Your Name]
+  Description    :
+  
+  This stored procedure loads and transforms data from the Bronze layer 
+  (raw data) into the Silver layer (cleaned and standardized data).
+
+  The procedure applies data cleansing, normalization, deduplication,
+  and business rule transformations to CRM and ERP source tables.
+
+  Key Operations Performed:
+  - Truncate-and-load strategy to ensure idempotency
+  - Removal of duplicate records using ROW_NUMBER()
+  - Data standardization (gender, marital status, product line)
+  - Null handling and default value replacement
+  - Date validation and correction
+  - Sales recalculation when inconsistencies are detected
+  - String trimming and formatting corrections
+  - Basic referential and structural cleanup
+
+  The procedure includes:
+  - Execution time tracking for each table
+  - Batch duration measurement
+  - TRY...CATCH error handling for reliability
+
+  Design Principle:
+  The Silver layer represents cleaned, validated, and transformation-ready
+  data that serves as the foundation for the Gold (business) layer.
+
+  Execution:
+      EXEC silver.load_silver;
+
+  Notes:
+  - This procedure follows an idempotent full reload strategy 
+    (TRUNCATE + INSERT).
+  - Designed for batch ETL processing in a layered data warehouse architecture.
+==============================================================================*/ 
 CREATE OR ALTER PROCEDURE silver.load_silver AS 
 DECLARE @end_time DATETIME,@start_time DATETIME, @batch_end_time DATETIME, @batch_start_time DATETIME;
 BEGIN
