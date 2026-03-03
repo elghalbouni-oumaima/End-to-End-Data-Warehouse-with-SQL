@@ -131,4 +131,4 @@ BEGIN CATCH
 END CATCH
 
 END;
-EXEC  bronze.load_bronze;
+--EXEC  bronze.load_bronze;

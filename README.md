@@ -29,6 +29,49 @@ The project follows a classical Data Warehouse architecture:
 * Aggregations & analytical queries
 * Performance considerations
 
+
+Perfect 👌 adding **Idempotency** to your README will make your project look much more professional — especially for data engineering roles.
+
+You should add it inside a section like:
+
+* `## 🔄 Data Pipeline Design`
+  or
+* `## 🏗 Architecture Decisions`
+  or
+* `## ⚙️ ETL Strategy`
+
+Here’s a clean, professional section you can paste directly into your README:
+
+---
+
+## 🔄 Idempotent ETL Design
+
+This project follows an **idempotent pipeline design** to ensure consistent and reproducible results across multiple executions.
+
+In each layer, tables are rebuilt using a **truncate-and-load strategy**:
+
+```sql
+TRUNCATE TABLE silver.table_name;
+
+INSERT INTO silver.table_name
+SELECT ...
+FROM bronze.table_name;
+```
+
+This guarantees that:
+
+* Running the transformation multiple times produces the same result
+* No duplicate records are introduced
+* The data remains deterministic and consistent
+* The pipeline can safely be re-executed in case of failure
+
+Idempotency is a critical principle in data engineering, especially in batch processing systems, as it ensures data integrity and reliability.
+
+---
+
+> While this project uses full reloads for simplicity, in production environments incremental loading strategies (e.g., MERGE-based upserts) are commonly implemented for scalability.
+
+
 ---
 
 ## 🛠 Technologies Used
