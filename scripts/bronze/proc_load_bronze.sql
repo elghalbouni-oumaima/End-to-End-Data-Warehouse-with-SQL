@@ -1,4 +1,43 @@
  
+/*==============================================================================
+  Procedure Name : bronze.load_bronze
+  Layer          : Bronze (Raw Layer)
+  Type           : Data Ingestion Procedure
+  Author         : [Your Name]
+
+  Description:
+  
+  This stored procedure loads raw source data from CSV files into the 
+  Bronze layer of the Data Warehouse.
+
+  The Bronze layer stores data exactly as received from source systems 
+  (CRM and ERP) with minimal or no transformation. It acts as a staging 
+  area to preserve original data for traceability and reprocessing.
+
+  Data Sources:
+  - CRM system (Customers, Products, Sales)
+  - ERP system (Customers, Locations, Product Categories)
+
+  Key Operations Performed:
+  - Truncate-and-load strategy to ensure idempotency
+  - Bulk ingestion using BULK INSERT
+  - Header row exclusion (FIRSTROW = 2)
+  - Performance optimization using TABLOCK
+  - Execution time tracking per table
+  - Batch duration measurement
+  - TRY...CATCH error handling for reliability
+
+  Design Principle:
+  The Bronze layer maintains raw, source-aligned data and serves as the 
+  foundation for downstream transformations in the Silver layer.
+
+  Execution:
+      EXEC bronze.load_bronze;
+
+  Notes:
+  - No data cleansing or transformation is performed at this stage.
+  - Designed for batch-based ingestion in a layered data warehouse architecture.
+==============================================================================*/
 CREATE OR ALTER PROCEDURE bronze.load_bronze AS 
 DECLARE @end_time DATETIME,@start_time DATETIME, @batch_end_time DATETIME, @batch_start_time DATETIME;
 BEGIN

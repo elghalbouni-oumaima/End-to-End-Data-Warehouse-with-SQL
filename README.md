@@ -1,106 +1,158 @@
-# End-to-End-Data-Warehouse-with-SQL
+# 🚀 SQL Data Warehouse Project
+Welcome to my End-to-End Data Warehouse Project repository!
 
-## 📊 SQL Data Warehouse Project
+## 📌 Overview
 
-This project demonstrates the design and implementation of an end-to-end **Data Warehouse** using SQL.
+This project demonstrates the design and implementation of a modern **SQL-based Data Warehouse** using the **Medallion Architecture (Bronze → Silver → Gold)**.
 
-The objective is to simulate a real-world data engineering workflow, including data modeling, ETL processing, and analytical query development.
+The goal of this project was to gain hands-on experience in:
+
+* Data warehousing concepts
+* ETL pipeline design
+* Data cleaning & transformation
+* Star schema modeling
+* Writing production-style SQL
+
+This project was developed by following a guided data engineering tutorial. I implemented each layer step-by-step to deeply understand medallion architecture, ETL design, and data modeling concepts.
 
 ---
 
-## 🏗 Project Architecture
+# 🏗️ Architecture
 
-The project follows a classical Data Warehouse architecture:
+![alt text](docs/data_architecture.png)
 
-* Source Data
-* ETL (Extract, Transform, Load)
+The warehouse follows a layered design:
+
+## 🥉 Bronze Layer – Raw Data
+
+* Loads CSV files into SQL Server
+* Uses `BULK INSERT`
+* Applies **full reload strategy (TRUNCATE + INSERT)**
+* Designed to be **idempotent** (safe to re-run without duplicating data)
+* No transformations applied
+
+## 🥈 Silver Layer – Cleaned & Structured Data
+
+* Deduplication using `ROW_NUMBER()`
+* Window functions (`LEAD`) for date validation
+* Filtering invalid records
+* Null handling
+* Standardizing categorical values
+* Enforcing business rules
+
+## 🥇 Gold Layer – Analytics Model
+
+* Star schema design
+* Fact and dimension tables
+* Optimized for analytical queries
+* Ready for BI tools
+
+---
+
+# 🔄 ETL Strategy
+
+### ✔ Full Reload (Idempotent Design)
+
+Each run:
+
+1. `TRUNCATE` target tables
+2. Re-load and transform data
+3. Rebuild analytics tables
+
+This ensures:
+
+* No duplicate records
+* Consistent results
+* Easy debugging during development
+
+---
+
+# 📊 Skills Demonstrated
+
+* SQL Development (T-SQL)
 * Data Modeling (Star Schema)
-* Fact and Dimension Tables
-* Analytical Queries for Business Intelligence
+* ETL Pipeline Design
+* Data Cleaning Techniques
+* Data Validation & Filtering
+* Schema Organization (Bronze/Silver/Gold)
+* Analytical Query Writing
 
 ---
 
-## 🧠 Key Concepts Applied
+# 🛠️ Tech Stack
 
-* OLTP vs OLAP systems
-* Star Schema modeling
-* Fact & Dimension tables
-* Data transformation using SQL
-* Aggregations & analytical queries
-* Performance considerations
-
-
-Perfect 👌 adding **Idempotency** to your README will make your project look much more professional — especially for data engineering roles.
-
-You should add it inside a section like:
-
-* `## 🔄 Data Pipeline Design`
-  or
-* `## 🏗 Architecture Decisions`
-  or
-* `## ⚙️ ETL Strategy`
-
-Here’s a clean, professional section you can paste directly into your README:
-
----
-
-## 🔄 Idempotent ETL Design
-
-This project follows an **idempotent pipeline design** to ensure consistent and reproducible results across multiple executions.
-
-In each layer, tables are rebuilt using a **truncate-and-load strategy**:
-
-```sql
-TRUNCATE TABLE silver.table_name;
-
-INSERT INTO silver.table_name
-SELECT ...
-FROM bronze.table_name;
-```
-
-This guarantees that:
-
-* Running the transformation multiple times produces the same result
-* No duplicate records are introduced
-* The data remains deterministic and consistent
-* The pipeline can safely be re-executed in case of failure
-
-Idempotency is a critical principle in data engineering, especially in batch processing systems, as it ensures data integrity and reliability.
-
----
-
-> While this project uses full reloads for simplicity, in production environments incremental loading strategies (e.g., MERGE-based upserts) are commonly implemented for scalability.
-
-
----
-
-## 🛠 Technologies Used
-
-* SQL
-* Relational Database System (e.g., MySQL / PostgreSQL / SQL Server)
+* SQL Server Express
+* SQL Server Management Studio (SSMS)
+* T-SQL
+* CSV Data Sources
 * Git & GitHub
 
 ---
 
-## 📈 Learning Outcomes
+# 📂 Repository Structure
 
-* Designed a scalable data warehouse schema
-* Implemented ETL transformations using SQL
-* Built analytical queries for business reporting
-* Applied data engineering best practices
+```
+data-warehouse-project/
+│
+├── datasets/                  # Raw CSV files (ERP & CRM)
+│
+├── docs/
+│   ├── data_architecture.png
+│   ├── data_model.png
+│   ├── data_flow.png
+│   ├── data_catalog.md
+│
+├── scripts/
+│   ├── bronze/                # Raw ingestion scripts
+│   ├── silver/                # Cleaning & transformation logic
+│   ├── gold/                  # Star schema & analytics tables
+│
+├── README.md
+└── .gitignore
+```
 
 ---
 
-## 🚀 Future Improvements
+# 🎯 What I Learned
 
-* Query optimization using indexing & execution plans
-* Integration with Python for automation
-* Dashboard integration (Power BI / Tableau)
-* Migration to a cloud-based environment
-
----
-
-> Developed as part of my Data Engineering learning journey.
+* Why raw data should never be transformed directly
+* The importance of idempotent ETL design
+* How to separate ingestion from transformation
+* How to enforce data quality rules
+* How dimensional modeling improves analytics performance
+* The difference between full reload and incremental load strategies
 
 ---
 
+# 🚀 Next Steps (Planned Improvements)
+
+* Implement incremental loading using `MERGE`
+* Add surrogate keys
+* Introduce logging & monitoring tables
+* Connect to Power BI for reporting
+* Add basic data quality tests
+
+---
+
+# 👨‍💻 Why This Project Matters
+
+This project represents my practical understanding of:
+
+* How data flows from raw files to analytics
+* How to structure a warehouse professionally
+* How to write clean and repeatable SQL transformations
+---
+# 🌟  About Me
+
+I built this project as part of my journey into Data Engineering and Analytics Engineering.
+Feel free to connect with me on LinkedIn and explore the repository!
+📬 Contact
+<p align="left">
+  <a href="https://www.linkedin.com/in/el-ghalbouni-oumaima-a73a26331/" target="_blank">
+    <img src="https://img.shields.io/badge/LinkedIn-Oumaima%20El%20Ghalbouni-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/>
+  </a>
+  
+  <a href="mailto:elghalbouniomaima@gmail.com">
+    <img src="https://img.shields.io/badge/Email-Contact%20Me-D14836?style=for-the-badge&logo=gmail&logoColor=white"/>
+  </a>
+</p>
