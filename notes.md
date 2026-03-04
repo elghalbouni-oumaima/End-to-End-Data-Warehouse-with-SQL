@@ -184,3 +184,11 @@ You can answer:
 ## 🎯Derived Columns:
 
 ![alt text](docs/derived_col_def.png)
+
+# Data Modeling
+
+![alt text](docs/data_modeling.png)
+
+## 📌 What is Data Integration?
+
+Data integration is the process of combining data from different sources into a single, unified view so it can be used for analysis, reporting, or operations.
