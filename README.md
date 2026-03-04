@@ -142,7 +142,7 @@ This project represents my practical understanding of:
 * How to structure a warehouse professionally
 * How to write clean and repeatable SQL transformations
 ---
-# 👨‍💻 About Me
+# 🌟  About Me
 
 I built this project as part of my journey into Data Engineering and Analytics Engineering.
 Feel free to connect with me on LinkedIn and explore the repository!
