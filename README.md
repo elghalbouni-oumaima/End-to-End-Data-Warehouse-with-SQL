@@ -1,4 +1,4 @@
-# 🚀 SQL Data Warehouse Project (Internship Portfolio)
+# 🚀 SQL Data Warehouse Project
 Welcome to my End-to-End Data Warehouse Project repository!
 
 ## 📌 Overview
@@ -142,8 +142,11 @@ This project represents my practical understanding of:
 * How to structure a warehouse professionally
 * How to write clean and repeatable SQL transformations
 ---
+# 👨‍💻 About Me
 
-# 📬 Contact
+I built this project as part of my journey into Data Engineering and Analytics Engineering.
+Feel free to connect with me on LinkedIn and explore the repository!
+📬 Contact
 <p align="left">
   <a href="https://www.linkedin.com/in/el-ghalbouni-oumaima-a73a26331/" target="_blank">
     <img src="https://img.shields.io/badge/LinkedIn-Oumaima%20El%20Ghalbouni-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/>
@@ -153,8 +156,3 @@ This project represents my practical understanding of:
     <img src="https://img.shields.io/badge/Email-Contact%20Me-D14836?style=for-the-badge&logo=gmail&logoColor=white"/>
   </a>
 </p>
----
-👨‍💻 About Me
-
-I built this project as part of my journey into Data Engineering and Analytics Engineering.
-Feel free to connect with me on LinkedIn and explore the repository!
