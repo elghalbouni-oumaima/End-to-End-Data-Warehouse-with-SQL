@@ -2,7 +2,6 @@
   Procedure Name : silver.load_silver
   Layer          : Silver
   Type           : ETL Transformation Procedure
-  Author         : [Your Name]
   Description    :
   
   This stored procedure loads and transforms data from the Bronze layer 

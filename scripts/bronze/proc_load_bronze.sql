@@ -3,7 +3,6 @@
   Procedure Name : bronze.load_bronze
   Layer          : Bronze (Raw Layer)
   Type           : Data Ingestion Procedure
-  Author         : [Your Name]
 
   Description:
   
