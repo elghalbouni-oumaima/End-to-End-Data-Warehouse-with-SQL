@@ -37,6 +37,7 @@
     (TRUNCATE + INSERT).
   - Designed for batch ETL processing in a layered data warehouse architecture.
 ==============================================================================*/ 
+
 CREATE OR ALTER PROCEDURE silver.load_silver AS 
 DECLARE @end_time DATETIME,@start_time DATETIME, @batch_end_time DATETIME, @batch_start_time DATETIME;
 DECLARE @rows_inserted INT, @rows_updated INT, @current_table VARCHAR(100);
