@@ -44,7 +44,7 @@ CREATE TABLE gold.dim_customers
     country NVARCHAR(50),
 
     -- Source Metadata
-    create_date DATE,
+    created_date DATE,
 
     -- Audit Columns
     created_at DATETIME2 NOT NULL
@@ -92,6 +92,59 @@ CREATE TABLE gold.dim_products
 );
 GO
 
+IF OBJECT_ID('gold.dim_date', 'U') IS NOT NULL
+    DROP TABLE gold.dim_date;
+GO
+CREATE TABLE gold.dim_dates
+(
+    -- Surrogate Key
+    date_key            INT PRIMARY KEY,          -- 20260806
+
+    -- Full Date
+    full_date           DATE NOT NULL UNIQUE,
+
+    -- Day
+    day_number          TINYINT NOT NULL,
+    day_name            NVARCHAR(20) NOT NULL,
+    day_short           CHAR(3) NOT NULL,
+    day_of_week         TINYINT NOT NULL,
+    day_of_year         SMALLINT NOT NULL,
+
+    -- Week
+    week_of_year        TINYINT NOT NULL,
+
+    -- Month
+    month_number        TINYINT NOT NULL,
+    month_name          NVARCHAR(20) NOT NULL,
+    month_short         CHAR(3) NOT NULL,
+
+    -- Quarter
+    quarter_number      TINYINT NOT NULL,
+    quarter_name        CHAR(2) NOT NULL,
+
+    -- Year
+    year_number         SMALLINT NOT NULL,
+
+    -- Reporting Columns
+    year_month          CHAR(7) NOT NULL,         -- 2026-08
+    month_year          CHAR(20) NOT NULL,         -- Aug 2026
+    month_year_sort     INT NOT NULL,             -- 202608
+
+    -- Flags
+    is_weekend          BIT NOT NULL,
+    is_business_day     BIT NOT NULL,
+
+    is_month_start      BIT NOT NULL,
+    is_month_end        BIT NOT NULL,
+
+    is_quarter_start    BIT NOT NULL,
+    is_quarter_end      BIT NOT NULL,
+
+    is_year_start       BIT NOT NULL,
+    is_year_end         BIT NOT NULL
+);
+
+
 
 ------------------------------------------------------------
 -- Sales Fact
@@ -135,6 +188,33 @@ CREATE TABLE gold.fact_sales
 
     CONSTRAINT FK_fact_sales_product
         FOREIGN KEY (product_key)
-        REFERENCES gold.dim_products(product_key)
+        REFERENCES gold.dim_products(product_key),
+
+    CONSTRAINT FK_fact_sales_order_date
+        FOREIGN KEY (order_date_key)
+        REFERENCES gold.dim_dates(date_key),
+
+    CONSTRAINT FK_fact_sales_shipping_date
+        FOREIGN KEY (shipping_date_key)
+        REFERENCES gold.dim_dates(date_key),
+
+    CONSTRAINT FK_fact_sales_due_date
+        FOREIGN KEY (due_date_key)
+        REFERENCES gold.dim_dates(date_key)
 );
 GO
+
+CREATE INDEX IX_dim_customers_customer_number
+ON gold.dim_customers(customer_number);
+
+CREATE INDEX IX_dim_customers_customer_number
+ON gold.dim_customers(customer_number);
+
+CREATE INDEX IX_fact_sales_order_date_key
+ON gold.fact_sales(order_date_key);
+
+CREATE INDEX IX_fact_sales_customer_key
+ON gold.fact_sales(customer_key);
+
+CREATE INDEX IX_fact_sales_customer_key
+ON gold.fact_sales(customer_key);

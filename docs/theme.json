@@ -1,0 +1,140 @@
+{
+  "name": "Corporate Dark Blue",
+  "foreground": "#FFFFFF",
+  "background": "#071C36",
+  "tableAccent": "#F2A900",
+
+  "dataColors": [
+    "#2F80ED",
+    "#17A2B8",
+    "#F2A900",
+    "#7E57C2",
+    "#26A69A",
+    "#F39C12",
+    "#42A5F5",
+    "#66BB6A",
+    "#EF5350",
+    "#90A4AE"
+  ],
+
+  "visualStyles": {
+
+    "*": {
+      "*": {
+
+        "title": [
+          {
+            "show": true,
+            "fontFamily": "Segoe UI",
+            "fontSize": 16,
+            "fontColor": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            }
+          }
+        ],
+
+        "labels": [
+          {
+            "color": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            },
+            "fontSize": 11,
+            "fontFamily": "Segoe UI"
+          }
+        ],
+
+        "categoryLabels": [
+          {
+            "color": {
+              "solid": {
+                "color": "#DCE6F2"
+              }
+            }
+          }
+        ],
+
+        "legend": [
+          {
+            "show": true,
+            "titleColor": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            },
+            "labelColor": {
+              "solid": {
+                "color": "#DCE6F2"
+              }
+            }
+          }
+        ],
+
+        "background": [
+          {
+            "show": true,
+            "color": {
+              "solid": {
+                "color": "#0B274A"
+              }
+            },
+            "transparency": 8
+          }
+        ],
+
+        "border": [
+          {
+            "show": false
+          }
+        ]
+      }
+    },
+
+    "card": {
+      "*": {
+
+        "labels": [
+          {
+            "color": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            },
+            "fontSize": 26
+          }
+        ],
+
+        "categoryLabels": [
+          {
+            "color": {
+              "solid": {
+                "color": "#C9D6E8"
+              }
+            },
+            "fontSize": 12
+          }
+        ]
+      }
+    },
+
+    "tableEx": {
+      "*": {
+
+        "grid": [
+          {
+            "gridVertical": true,
+            "gridHorizontal": true,
+            "outlineColor": {
+              "solid": {
+                "color": "#274F78"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

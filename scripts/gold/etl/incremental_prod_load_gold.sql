@@ -10,7 +10,7 @@
   Load order matters:
     1. dim_customers  - no dependencies
     2. dim_products   - no dependencies
-    3. fact_sales     - depends on dim_customers and dim_products already
+    3. fact_sales     - depends on dim_customers, dim_products and dim_dates already
                          being up to date, since it looks up their surrogate
                          keys. Each MERGE commits before the next runs, so
                          this works correctly within a single procedure call
@@ -45,14 +45,14 @@ BEGIN TRY
         SELECT
             m.cst_id            AS customer_id,
             m.cst_key           AS customer_number,
-            m.cst_firstname     AS firstname,
-            m.cst_lastname      AS lastname,
+            m.cst_firstname     AS first_name,
+            m.cst_lastname      AS last_name,
             m.cst_marital_status AS marital_status,
             b.cntry              AS country,
             CASE WHEN m.cst_gndr <> 'n/a' THEN m.cst_gndr
                  ELSE COALESCE(a.gen, 'n/a') END AS gender,
-            a.bdate               AS birthdate,
-            m.cst_create_date     AS create_date
+            a.bdate               AS birth_date,
+            m.cst_create_date     AS created_date
         FROM silver.crm_cust_info m
         LEFT JOIN silver.erp_cust_az12 a ON m.cst_key = a.cid
         LEFT JOIN silver.erp_loc_a101 b  ON b.cid = m.cst_key
@@ -61,26 +61,26 @@ BEGIN TRY
     USING customer_source AS source
           ON target.customer_id = source.customer_id
     WHEN MATCHED AND HASHBYTES('SHA2_256', CONCAT_WS('|',
-            target.customer_number, target.firstname, target.lastname, target.marital_status,
-            ISNULL(target.country,''), target.gender, ISNULL(CONVERT(VARCHAR(10), target.birthdate, 120),''),
-            CONVERT(VARCHAR(10), target.create_date, 120)))
+            target.customer_number, target.first_name, target.last_name, target.marital_status,
+            ISNULL(target.country,''), target.gender, ISNULL(CONVERT(VARCHAR(10), target.birth_date, 120),''),
+            CONVERT(VARCHAR(10), target.created_date, 120)))
         <> HASHBYTES('SHA2_256', CONCAT_WS('|',
-            source.customer_number, source.firstname, source.lastname, source.marital_status,
-            ISNULL(source.country,''), source.gender, ISNULL(CONVERT(VARCHAR(10), source.birthdate, 120),''),
-            CONVERT(VARCHAR(10), source.create_date, 120)))
+            source.customer_number, source.first_name, source.last_name, source.marital_status,
+            ISNULL(source.country,''), source.gender, ISNULL(CONVERT(VARCHAR(10), source.birth_date, 120),''),
+            CONVERT(VARCHAR(10), source.created_date, 120)))
     THEN UPDATE SET
         customer_number = source.customer_number,
-        firstname        = source.firstname,
-        lastname         = source.lastname,
+        first_name        = source.first_name,
+        last_name         = source.last_name,
         marital_status   = source.marital_status,
         country          = source.country,
         gender           = source.gender,
-        birthdate        = source.birthdate,
-        create_date      = source.create_date
+        birth_date        = source.birth_date,
+        created_date      = source.created_date
     WHEN NOT MATCHED BY TARGET THEN
-        INSERT (customer_id, customer_number, firstname, lastname, marital_status, country, gender, birthdate, create_date)
-        VALUES (source.customer_id, source.customer_number, source.firstname, source.lastname,
-                source.marital_status, source.country, source.gender, source.birthdate, source.create_date)
+        INSERT (customer_id, customer_number, first_name, last_name, marital_status, country, gender, birth_date, created_date)
+        VALUES (source.customer_id, source.customer_number, source.first_name, source.last_name,
+                source.marital_status, source.country, source.gender, source.birth_date, source.created_date)
     OUTPUT $action INTO @merge_output(action_type);
 
     SELECT @rows_inserted = COUNT(*) FROM @merge_output WHERE action_type = 'INSERT';
@@ -144,10 +144,10 @@ BEGIN TRY
         updated_at                  = SYSUTCDATETIME()
     WHEN NOT MATCHED BY TARGET THEN
         INSERT (product_id, product_number, product_name, category_id, category, subcategory,
-                maintenance, product_cost, product_line, product_start_date, updated_at)
+                maintenance, product_cost, product_line, product_start_date)
         VALUES (source.product_id, source.product_number, source.product_name, source.category_id,
                 source.category, source.subcategory, source.maintenance, source.product_cost,
-                source.product_line, source.product_start_date, SYSUTCDATETIME())
+                source.product_line, source.product_start_date)
     OUTPUT $action INTO @merge_output(action_type);
 
     SELECT @rows_inserted = COUNT(*) FROM @merge_output WHERE action_type = 'INSERT';
@@ -173,43 +173,66 @@ BEGIN TRY
 
     ;WITH order_source AS (
         SELECT
-            m.sls_ord_num  AS order_number,
-            b.product_key,
-            a.customer_key,
-            m.sls_order_dt AS order_date,
-            m.sls_ship_dt  AS shipping_date,
-            m.sls_due_dt   AS due_date,
-            m.sls_sales    AS sales_amount,
-            m.sls_quantity AS quantity,
-            m.sls_price    AS price
-        FROM silver.crm_sales_details m
-        LEFT JOIN gold.dim_customers a ON a.customer_id = m.sls_cust_id
-        LEFT JOIN gold.dim_products b  ON b.product_number = m.sls_prd_key
+            m.sls_ord_num,
+
+            dc.customer_key,
+
+            dp.product_key,
+
+            od.date_key AS order_date_key,
+
+            sd.date_key AS shipping_date_key,
+
+            dd.date_key AS due_date_key,
+
+            m.sls_sales,
+
+            m.sls_quantity,
+
+            m.sls_price
+
+            FROM silver.crm_sales_details m
+
+            LEFT JOIN gold.dim_customers dc
+            ON dc.customer_id = m.sls_cust_id
+
+            LEFT JOIN gold.dim_products dp
+            ON dp.product_number = m.sls_prd_key
+
+            LEFT JOIN gold.dim_dates od
+            ON od.full_date = m.sls_order_dt
+
+            LEFT JOIN gold.dim_dates sd
+            ON sd.full_date = m.sls_ship_dt
+
+            LEFT JOIN gold.dim_dates dd
+            ON dd.full_date = m.sls_due_dt
     )
     MERGE INTO gold.fact_sales AS target
     USING order_source AS source
           ON target.order_number = source.order_number
          AND ISNULL(target.product_key,-1) = ISNULL(source.product_key,-1)
     WHEN MATCHED AND HASHBYTES('SHA2_256', CONCAT_WS('|',
-            ISNULL(target.customer_key,-1), CONVERT(VARCHAR(10), target.order_date, 120),
-            CONVERT(VARCHAR(10), target.shipping_date, 120), CONVERT(VARCHAR(10), target.due_date, 120),
+            ISNULL(target.customer_key,-1), CONVERT(VARCHAR(10), target.order_date_key, 120),
+            CONVERT(VARCHAR(10), target.shipping_date_key, 120), CONVERT(VARCHAR(10), target.due_date_key, 120),
             CAST(target.sales_amount AS VARCHAR), CAST(target.quantity AS VARCHAR), CAST(target.price AS VARCHAR)))
         <> HASHBYTES('SHA2_256', CONCAT_WS('|',
-            ISNULL(source.customer_key,-1), CONVERT(VARCHAR(10), source.order_date, 120),
-            CONVERT(VARCHAR(10), source.shipping_date, 120), CONVERT(VARCHAR(10), source.due_date, 120),
+            ISNULL(source.customer_key,-1), CONVERT(VARCHAR(10), source.order_date_key, 120),
+            CONVERT(VARCHAR(10), source.shipping_date_key, 120), CONVERT(VARCHAR(10), source.due_date_key, 120),
             CAST(source.sales_amount AS VARCHAR), CAST(source.quantity AS VARCHAR), CAST(source.price AS VARCHAR)))
     THEN UPDATE SET
         customer_key   = source.customer_key,
-        order_date      = source.order_date,
-        shipping_date    = source.shipping_date,
-        due_date          = source.due_date,
+        order_date_key      = source.order_date_key,
+        shipping_date_key    = source.shipping_date_key,
+        due_date_key          = source.due_date_key,
         sales_amount       = source.sales_amount,
         quantity             = source.quantity,
-        price                 = source.price
+        price                 = source.price,
+        updated_at = SYSUTCDATETIME()
     WHEN NOT MATCHED BY TARGET THEN
-        INSERT (order_number, product_key, customer_key, order_date, shipping_date, due_date, sales_amount, quantity, price)
-        VALUES (source.order_number, source.product_key, source.customer_key, source.order_date,
-                source.shipping_date, source.due_date, source.sales_amount, source.quantity, source.price)
+        INSERT (order_number, product_key, customer_key, order_date_key, shipping_date_key, due_date_key, sales_amount, quantity, price)
+        VALUES (source.order_number, source.product_key, source.customer_key, source.order_date_key,
+                source.shipping_date_key, source.due_date_key, source.sales_amount, source.quantity, source.price)
     OUTPUT $action INTO @merge_output(action_type);
 
     SELECT @rows_inserted = COUNT(*) FROM @merge_output WHERE action_type = 'INSERT';
