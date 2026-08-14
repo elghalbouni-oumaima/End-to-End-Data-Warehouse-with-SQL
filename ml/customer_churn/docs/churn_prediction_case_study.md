@@ -266,12 +266,11 @@ country_United Kingdom    0.009
 `tenure_days` and `recency_days` together drive ~60% of the model's
 decisions — intuitive for a business with an infrequent purchase cycle.
 
-**Caveat flagged, not yet resolved:** `country_Australia` ranks above
-`monetary` and `frequency`, which is unusual — a single country outranking
-how much or how often someone spends. Plausible (logistics/shipping could
-genuinely affect repeat-purchase behavior by region), but also a classic
-sign of a small-sample artifact, where a tree latches onto a low-count
-category by chance. Flagged for follow-up:
+**Caveat investigated and resolved:** `country_Australia` ranked above
+`monetary` and `frequency` in feature importance, which was unusual enough
+to verify rather than trust outright — a single country outranking how much
+or how often someone spends could easily be a small-sample artifact, where a
+tree latches onto a low-count category by chance. Checked with:
 
 ```sql
 SELECT country, COUNT(*) AS customers, AVG(CAST(churned AS FLOAT)) AS churn_rate
@@ -279,8 +278,11 @@ FROM gold.customer_churn_training
 GROUP BY country
 ORDER BY customers DESC;
 ```
-*(Still pending — check customer count vs. churn rate for Australia before
-trusting that importance score.)*
+
+**Result:** Australia is the largest country segment (1,916 of 5,671
+training customers, ~34%) with a churn rate of 4.0% — well below the 15.8%
+baseline. Large sample, large deviation from baseline: the importance score
+is a genuine signal, not noise.
 
 ---
 
@@ -387,12 +389,8 @@ Raw CSVs (CRM/ERP)
 
 ## 10. Open follow-ups (not yet done)
 
-- [ ] Confirm the `country_Australia` feature importance against actual
-      per-country churn rates and sample sizes.
 - [ ] Decide and document a re-run cadence for the churn scoring script
       (manual vs. run automatically after every `gold.load_gold`).
-- [ ] Wire `gold.customer_churn_predictions` into a Power BI "Customers at
-      Risk" page.
 - [ ] Consider comparing `RandomForestClassifier` against a simpler
       `LogisticRegression` baseline — easier to explain to a non-technical
       stakeholder ("higher recency + lower frequency = higher churn odds"),
