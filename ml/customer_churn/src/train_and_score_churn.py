@@ -25,7 +25,11 @@ from sqlalchemy import create_engine, text
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, roc_auc_score, confusion_matrix
-
+from sklearn.pipeline import make_pipeline,Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.utils.class_weight import compute_sample_weight
 # --------------------------------------------------------------------------
 # 1. CONNECTION - update this for your environment
 # --------------------------------------------------------------------------
@@ -48,13 +52,10 @@ FEATURE_COLS = ["recency_days", "frequency", "monetary", "avg_order_value", "ten
 print(">> Loading training data...")
 train_df = pd.read_sql("SELECT * FROM gold.customer_churn_training", engine)
 print(f"   {len(train_df)} customers | churn rate: {train_df['churned'].mean():.1%}")
+model_columns = [c for c in train_df.columns if c not in ("customer_id", "churned")]
 
-# One-hot encode categoricals
-train_encoded = pd.get_dummies(train_df, columns=CATEGORICAL_COLS, drop_first=False)
-model_columns = [c for c in train_encoded.columns if c not in ("customer_id", "churned")]
-
-X = train_encoded[model_columns]
-y = train_encoded["churned"]
+X = train_df[model_columns]
+y = train_df["churned"]
 
 # --------------------------------------------------------------------------
 # 3. TRAIN / TEST SPLIT + MODEL
@@ -63,16 +64,41 @@ X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, stratify=y
 )
 
-# class_weight='balanced' matters here: churn is usually the minority class,
-# and without this the model can get lazy and just predict "not churned" a lot.
-model = RandomForestClassifier(
-    n_estimators=300,
-    max_depth=8,
-    class_weight="balanced",
-    random_state=42,
-    n_jobs=-1,
+# Numerical features
+numerical_pipeline = Pipeline([
+    ("imputer", SimpleImputer(strategy="median")),
+    ("scaler", StandardScaler())
+])
+
+# Categorical features
+categorical_pipeline = Pipeline([
+    ("imputer", SimpleImputer(strategy="most_frequent")),
+    ("encoder", OneHotEncoder(
+        handle_unknown="ignore",
+        sparse_output=False
+    ))
+])
+
+# Combine preprocessing
+preprocessor = ColumnTransformer(
+    transformers=[
+        ("num", numerical_pipeline, FEATURE_COLS),
+        ("cat", categorical_pipeline, CATEGORICAL_COLS)
+    ],
+    remainder="drop"
 )
-model.fit(X_train, y_train)
+
+# Create the model
+gb_model = RandomForestClassifier(
+    random_state=42
+)
+
+# Create the pipeline
+model = make_pipeline(preprocessor, gb_model)
+
+# Train on the entire training set
+sample_weights = compute_sample_weight(class_weight="balanced", y=y_train)
+model.fit(X_train, y_train, randomforestclassifier__sample_weight=sample_weights)
 
 # --------------------------------------------------------------------------
 # 4. EVALUATE
@@ -89,8 +115,22 @@ print("\n>> Confusion matrix (rows=actual, cols=predicted):")
 print(confusion_matrix(y_test, y_pred))
 
 print("\n>> Top feature importances:")
-importances = pd.Series(model.feature_importances_, index=model_columns).sort_values(ascending=False)
+gb_step = model.named_steps["randomforestclassifier"]
+feature_names = model.named_steps["columntransformer"].get_feature_names_out()
+importances = pd.Series(gb_step.feature_importances_, index=feature_names).sort_values(ascending=False)
 print(importances.head(10).to_string())
+# --------------------------------------------------------------------------
+# Save ALL feature importances to the warehouse, not just the top 10 printed
+# --------------------------------------------------------------------------
+importance_df = importances.reset_index()
+importance_df.columns = ["feature_name", "importance"]
+importance_df["trained_at"] = datetime.now()
+
+with engine.begin() as conn:
+    conn.execute(text("TRUNCATE TABLE gold.churn_feature_importance"))
+importance_df.to_sql("churn_feature_importance", engine, schema="gold", if_exists="append", index=False)
+
+print(f"\n>> Saved {len(importance_df)} feature importances to gold.churn_feature_importance")
 
 # --------------------------------------------------------------------------
 # 5. SAVE THE MODEL

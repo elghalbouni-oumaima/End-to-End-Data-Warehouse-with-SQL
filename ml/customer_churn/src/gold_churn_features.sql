@@ -53,6 +53,19 @@ CREATE TABLE gold.customer_churn_predictions (
 );
 GO
 
+CREATE TABLE gold.churn_feature_importance (
+    feature_name VARCHAR(100),
+    importance   DECIMAL(10,6),
+    trained_at   DATETIME
+);
+
+CREATE OR ALTER VIEW gold.vw_customer_risk_detail AS
+SELECT
+    p.customer_id, p.churn_probability, p.risk_tier, p.scored_at,
+    s.recency_days, s.frequency, s.monetary, s.avg_order_value, s.tenure_days, s.age
+FROM gold.customer_churn_predictions p
+JOIN gold.customer_churn_scoring s ON s.customer_id = p.customer_id;
+
 /* ==========================================================================
    PROCEDURE: gold.build_churn_training_data
 ========================================================================== */
@@ -143,6 +156,8 @@ GO
 EXEC gold.build_churn_training_data;
 EXEC gold.build_churn_scoring_data;
 SELECT churned, COUNT(*) as perct FROM gold.customer_churn_training GROUP BY churned;
+
+
 /* ==========================================================================
    DIAGNOSTIC: run first to sanity-check the 180-day churn window assumption.
 ========================================================================== */
