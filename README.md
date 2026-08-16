@@ -368,10 +368,10 @@ The predictions are stored in:
 ```text
 gold.customer_churn_predictions
 ```
-
 Full reasoning, every diagnostic query, and the bugs caught along the way
 are documented in
 [`ml/customer_churn/docs/churn_prediction_case_study.md`](ml/customer_churn/docs/churn_prediction_case_study.md).
+
 ---
 
 # 📊 Power BI Analytics
