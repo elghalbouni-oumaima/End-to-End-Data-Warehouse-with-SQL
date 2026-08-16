@@ -3,3 +3,5 @@ scikit-learn
 sqlalchemy
 pyodbc
 joblib
+fastapi 
+uvicorn[standard]
